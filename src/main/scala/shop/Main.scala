@@ -1,6 +1,7 @@
 package shop
 
 import shop.domain.service.PriceCalculator
+import shop.domain.service.discount.{ThreeOrangesForTwo, TwoApplesForOne}
 import shop.domain.service.parser.{ItemStringParser, ShoppingCartStringParser}
 
 import scala.io.StdIn
@@ -11,10 +12,12 @@ import scalaz.{Failure, NonEmptyList, Success}
   */
 object Main extends App with ShoppingCartStringParser with ItemStringParser with PriceCalculator {
 
+  val discountCalculators = Seq(ThreeOrangesForTwo, TwoApplesForOne)
+
   val inputString = StdIn.readLine(s"Please provide items list in format: item1${separator}item2${separator}...${separator}itemN (e.g: Apple;Apple;Orange)\n")
 
   parseShoppingCart(inputString) match {
-    case Success(shoppingCart) => (calculatePrice _ andThen printTotalPrice) (shoppingCart)
+    case Success(shoppingCart) => (calculatePrice(discountCalculators) _ andThen printTotalPrice) (shoppingCart)
     case Failure(exceptions) => printExceptions(exceptions)
   }
 
